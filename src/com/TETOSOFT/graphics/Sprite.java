@@ -2,99 +2,158 @@ package com.TETOSOFT.graphics;
 
 import java.awt.Image;
 
+/**
+ * The Sprite class represents a movable game object with animation.
+ * It handles position, velocity, and maintains an animation sequence.
+ * This class provides the foundation for animated game characters and objects.
+ */
 public class Sprite {
 
+    /** The animation sequence for this sprite */
     protected Animation anim;
-    
+
+    /** X-coordinate position of the sprite */
     private float x;
+
+    /** Y-coordinate position of the sprite */
     private float y;
-    
+
+    /** Horizontal velocity (pixels per millisecond) */
     private float dx;
+
+    /** Vertical velocity (pixels per millisecond) */
     private float dy;
 
-    
-    public Sprite(Animation anim) 
-    {
+    /**
+     * Creates a new Sprite with the specified animation.
+     *
+     * @param anim The animation sequence to use for this sprite
+     */
+    public Sprite(Animation anim) {
         this.anim = anim;
     }
 
-    
-    
-    public void update(long elapsedTime) 
-    {
+    /**
+     * Updates the sprite's position and animation based on elapsed time.
+     * Position is updated according to the sprite's velocity.
+     *
+     * @param elapsedTime Time elapsed since the last update (in milliseconds)
+     */
+    public void update(long elapsedTime) {
+        // Update position based on velocity and elapsed time
         x += dx * elapsedTime;
         y += dy * elapsedTime;
+        // Update the animation frame
         anim.update(elapsedTime);
     }
 
-    
-    public float getX() 
-    {
+    /**
+     * Gets the sprite's X-coordinate.
+     *
+     * @return The current X position
+     */
+    public float getX() {
         return x;
     }
 
-    
+    /**
+     * Gets the sprite's Y-coordinate.
+     *
+     * @return The current Y position
+     */
     public float getY() {
         return y;
     }
 
-    
-    public void setX(float x) 
-    {
+    /**
+     * Sets the sprite's X-coordinate.
+     *
+     * @param x The new X position
+     */
+    public void setX(float x) {
         this.x = x;
     }
 
-   
-    public void setY(float y)
-    {
+    /**
+     * Sets the sprite's Y-coordinate.
+     *
+     * @param y The new Y position
+     */
+    public void setY(float y) {
         this.y = y;
     }
 
-   
-    public int getWidth() 
-    {
+    /**
+     * Gets the width of the sprite's current image.
+     *
+     * @return The width in pixels
+     */
+    public int getWidth() {
         return anim.getImage().getWidth(null);
     }
 
-    
-    public int getHeight() 
-    {
+    /**
+     * Gets the height of the sprite's current image.
+     *
+     * @return The height in pixels
+     */
+    public int getHeight() {
         return anim.getImage().getHeight(null);
     }
 
-    
-    public float getVelocityX() 
-    {
+    /**
+     * Gets the sprite's horizontal velocity.
+     *
+     * @return The horizontal velocity (pixels per millisecond)
+     */
+    public float getVelocityX() {
         return dx;
     }
 
-   
-    public float getVelocityY()
-    {
+    /**
+     * Gets the sprite's vertical velocity.
+     *
+     * @return The vertical velocity (pixels per millisecond)
+     */
+    public float getVelocityY() {
         return dy;
     }
 
-    
-    public void setVelocityX(float dx) 
-    {
+    /**
+     * Sets the sprite's horizontal velocity.
+     *
+     * @param dx The new horizontal velocity (pixels per millisecond)
+     */
+    public void setVelocityX(float dx) {
         this.dx = dx;
     }
 
-    
-    public void setVelocityY(float dy) 
-    {
+    /**
+     * Sets the sprite's vertical velocity.
+     *
+     * @param dy The new vertical velocity (pixels per millisecond)
+     */
+    public void setVelocityY(float dy) {
         this.dy = dy;
     }
 
-    
-    public Image getImage() 
-    {
+    /**
+     * Gets the current image of the sprite's animation.
+     *
+     * @return The current image frame
+     */
+    public Image getImage() {
         return anim.getImage();
     }
 
-    
-    public Object clone() 
-    {
+    /**
+     * Creates and returns a copy of this sprite.
+     * Note: This creates a new Sprite instance with the same animation,
+     * but position and velocity are reset.
+     *
+     * @return A clone of this sprite
+     */
+    public Object clone() {
         return new Sprite(anim);
     }
 }
