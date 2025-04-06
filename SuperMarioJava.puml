@@ -1,0 +1,282 @@
+@startuml SuperMarioJava
+
+' Simplified style
+skinparam classAttributeIconSize 0
+
+' Package definitions
+package "com.TETOSOFT.graphics" {
+  class Animation {
+    - frames: ArrayList
+    - currFrameIndex: int
+    - animTime: long
+    - totalDuration: long
+    - loop: boolean
+    + Animation()
+    + addFrame(image: Image, duration: long)
+    + start()
+    + update(elapsedTime: long)
+    + getImage(): Image
+    + clone(): Object
+  }
+
+  class Sprite {
+    # anim: Animation
+    - x: float
+    - y: float
+    - dx: float
+    - dy: float
+    + Sprite(anim: Animation)
+    + update(elapsedTime: long)
+    + getX(): float
+    + getY(): float
+    + setX(x: float)
+    + setY(y: float)
+    + getWidth(): int
+    + getHeight(): int
+    + getVelocityX(): float
+    + getVelocityY(): float
+    + setVelocityX(dx: float)
+    + setVelocityY(dy: float)
+    + getImage(): Image
+    + clone(): Object
+  }
+
+  class ScreenManager {
+    - device: GraphicsDevice
+    - currentDisplayMode: DisplayMode
+    + ScreenManager()
+    + getCurrentDisplayMode(): DisplayMode
+    + getCompatibleDisplayModes(): DisplayMode[]
+    + findFirstCompatibleMode(modes: DisplayMode[]): DisplayMode
+    + getDisplayMode(): DisplayMode
+    + setDisplayMode(displayMode: DisplayMode)
+    + setFullScreen(displayMode: DisplayMode)
+    + restoreScreen()
+    + getGraphicsDevice(): GraphicsDevice
+    + getFullScreenWindow(): Window
+    + getWidth(): int
+    + getHeight(): int
+    + createCompatibleImage(w: int, h: int, transparency: int): BufferedImage
+  }
+}
+
+package "com.TETOSOFT.input" {
+  class GameAction {
+    + {static} NORMAL: int
+    + {static} DETECT_INITAL_PRESS_ONLY: int
+    - name: String
+    - behavior: int
+    - amount: int
+    - pressedList: List
+    + GameAction(name: String)
+    + GameAction(name: String, behavior: int)
+    + getName(): String
+    + getAmount(): int
+    + isPressed(): boolean
+    + press()
+    + press(amount: int)
+    + release()
+    + tap()
+    + reset()
+  }
+
+  class InputManager {
+    + {static} INVISIBLE_CURSOR: Cursor
+    - keyActions: Map
+    - mouseActions: Map
+    - relativeMouseMode: boolean
+    - mouseLocation: Point
+    - lastMouseLocation: Point
+    - component: Component
+    + InputManager(component: Component)
+    + setCursor(cursor: Cursor)
+    + setRelativeMouseMode(mode: boolean)
+    + isRelativeMouseMode(): boolean
+    + getMouseLocation(): Point
+    + getMouseX(): int
+    + getMouseY(): int
+    + mapToKey(gameAction: GameAction, keyCode: int)
+    + mapToMouse(gameAction: GameAction, mouseCode: int)
+  }
+}
+
+package "com.TETOSOFT.test" {
+  abstract class GameCore {
+    # running: boolean
+    # screen: ScreenManager
+    # gameLength: long
+    # font: Font
+    + stop()
+    + run()
+    + init()
+    # lazilyLoadFonts()
+    + update(elapsedTime: long)
+    + gameUpdate(elapsedTime: long)
+    + draw(g: Graphics2D)
+  }
+}
+
+package "com.TETOSOFT.tilegame" {
+  class GameEngine {
+    + {static} GRAVITY: float
+    - pointCache: Point
+    - map: TileMap
+    - mapLoader: MapLoader
+    - inputManager: InputManager
+    - drawer: TileMapDrawer
+    - moveLeft: GameAction
+    - moveRight: GameAction
+    - jump: GameAction
+    - exit: GameAction
+    - collectedStars: int
+    - numLives: int
+    + {static} main(args: String[])
+    + init()
+    + stop()
+    - initInput()
+    - checkInput(elapsedTime: long)
+    + draw(g: Graphics2D)
+    + getMap(): TileMap
+    + getTileCollision(sprite: Sprite, newX: float, newY: float): Point
+    + isCollision(s1: Sprite, s2: Sprite): boolean
+    + getSpriteCollision(sprite: Sprite): Sprite
+    + update(elapsedTime: long)
+    - updateCreature(creature: Creature, elapsedTime: long)
+  }
+
+  class MapLoader {
+    - tmHeight: int
+    - tmWidth: int
+    - background: Image
+    - currentMap: int
+    - maps: String[]
+    - tileSets: List
+    - resourceManager: ResourceManager
+    + MapLoader(gc: GraphicsConfiguration)
+    + loadImage(fileName: String): Image
+    + loadPowerUpSprites()
+    + loadCreatureSprites()
+    + createGrub(right: Animation, left: Animation, deadRight: Animation, deadLeft: Animation): Creature
+    + createFly(right: Animation, left: Animation, deadRight: Animation, deadLeft: Animation): Creature
+    + createPlayer(right: Animation, left: Animation, deadRight: Animation, deadLeft: Animation): Creature
+    + loadPowerUp(color: String): PowerUp
+    + loadMap(filename: String): TileMap
+    + loadNextMap(): TileMap
+    + reloadMap(): TileMap
+  }
+
+  class TileMap {
+    - width: int
+    - height: int
+    - tiles: Image[][]
+    - sprites: List
+    - player: Sprite
+    + TileMap(width: int, height: int)
+    + getWidth(): int
+    + getHeight(): int
+    + getTile(x: int, y: int): Image
+    + setTile(x: int, y: int, tile: Image)
+    + getPlayer(): Sprite
+    + setPlayer(player: Sprite)
+    + getSprites(): Iterator
+    + addSprite(sprite: Sprite)
+  }
+
+  class TileMapDrawer {
+    - tilesToPixels: int
+    - background: Image
+    + {static} pixelsToTiles(pixels: int): int
+    + {static} tilesToPixels(tiles: int): int
+    + setBackground(background: Image)
+    + draw(g: Graphics2D, map: TileMap, screenWidth: int, screenHeight: int)
+    - calcOffset(map: TileMap, screenWidth: int, screenHeight: int): Point
+  }
+
+  package "com.TETOSOFT.tilegame.sprites" {
+    abstract class Creature {
+      + {static} STATE_NORMAL: int
+      + {static} STATE_DYING: int
+      + {static} STATE_DEAD: int
+      - left: Animation
+      - right: Animation
+      - deadLeft: Animation
+      - deadRight: Animation
+      - state: int
+      - stateTime: long
+      + Creature(left: Animation, right: Animation, deadLeft: Animation, deadRight: Animation)
+      + clone(): Object
+      + getMaxSpeed(): float
+      + wakeUp()
+      + getState(): int
+      + setState(state: int)
+      + isAlive(): boolean
+      + isFlying(): boolean
+      + collideHorizontal()
+      + collideVertical()
+      + update(elapsedTime: long)
+    }
+
+    class Player {
+      - onGround: boolean
+      + Player(left: Animation, right: Animation, deadLeft: Animation, deadRight: Animation)
+      + clone(): Object
+      + getMaxSpeed(): float
+      + collideHorizontal()
+      + jump(forceJump: boolean)
+      + isOnGround(): boolean
+      + setOnGround(onGround: boolean)
+    }
+
+    class Grub {
+      + Grub(left: Animation, right: Animation, deadLeft: Animation, deadRight: Animation)
+      + getMaxSpeed(): float
+    }
+
+    class Fly {
+      - jumpHeight: float
+      + Fly(left: Animation, right: Animation, deadRight: Animation, deadLeft: Animation)
+      + getMaxSpeed(): float
+      + isFlying(): boolean
+    }
+
+    class PowerUp {
+      + {static} STAR: int
+      + {static} MUSIC: int
+      + {static} GOAL: int
+      - type: int
+      + PowerUp(anim: Animation, type: int)
+      + clone(): Object
+      + getType(): int
+    }
+  }
+}
+
+' Inheritance relationships
+GameCore <|-- GameEngine
+Sprite <|-- Creature
+Creature <|-- Player
+Creature <|-- Grub
+Creature <|-- Fly
+Sprite <|-- PowerUp
+
+' Associations
+Sprite --> Animation
+GameEngine --> TileMap
+GameEngine --> MapLoader
+GameEngine --> InputManager
+GameEngine --> TileMapDrawer
+TileMap --> Sprite
+InputManager --> GameAction
+GameEngine --> GameAction
+MapLoader ..> Creature
+MapLoader ..> PowerUp
+MapLoader ..> Player
+MapLoader ..> Grub
+MapLoader ..> Fly
+
+' Dependencies
+GameEngine ..> Creature
+GameEngine ..> PowerUp
+TileMapDrawer ..> TileMap
+
+@enduml 
